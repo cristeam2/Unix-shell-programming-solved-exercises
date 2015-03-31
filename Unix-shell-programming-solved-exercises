@@ -1,0 +1,272 @@
+  pipelining and redirection: head, tail, wc, sort, grep, uni and tr
+  -----------------------------------------------------------------
+  - Count users of our system
+  - Conta gli utenti del tuo sistema
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	wc /etc/passwd
+	wc -l /etc/passwd
+	awk 'END { print NR }' /etc/passwd
+	cat /etc/passwd | awk -v FS=: '{ s++ } END { print s }'
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>wc : conta riga
+	>>>tr: translate o delete carattere
+	>>>uniq:report or filter out repeated lines in a file
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	-To see a complete list of all system users have to type:
+	-Per vedere un elenco completo di tutti gli utenti del sistema devi digitare:
+	cat /etc/passwd
+
+	-Per vedere solo gli utenti "umani" è possibile utilizzare due sintassi. La prima è questa:
+	-To see only the users "human" you can use two syntaxes. The first is this:
+	cat /etc/passwd | grep 500*
+
+	Questo comando stampa un elenco di utenti con User ID uguale o superiore a 500 (gli ID inferiori 500 sono, solitamente, utilizzati dal sistema).
+	In alternativa è possibile stampare una lista dei soli utenti muniti di una home directory (che normalmente, appunto, sono gli utenti "umani" del sistema):
+	cat /etc/passwd | grep /home | cut -d: -f1
+	
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- mostra il file passwd ordinato 
+	sort /etc/passwd
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	- mostra una lista di utenti (tipo quella contenuta in /etc/passwd) in ordine alfabetico e in cui i campi sono separati da virgole
+	sort /etc/passwd | tr -s : ‘;’
+	awk -F ‘:’ ‘BEGIN{OFS=“,”;} {print $0}’ /etc/passwd
+	cat /etc/passwd | sort |  awk ' BEGIN {FS=":"} {for(i=1; i<=NF; i++){ printf 	$i; 	if(i!=NF) printf ","} print""}'
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	Le righe di /etc/passwd si presentano nella seguente forma:
+	Username:Password:UserID:GroupID:Info:HomeDirectory:Shell 
+
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	- mostra una lista di utenti come sopra ma mostrando solo quelli che usano bash come shell.
+
+	grep -s ‘/bash’ /etc/passwd
+	cat /etc/passwd | sort |  awk ' BEGIN {FS=":"} /bash/ {formi=1; i<=NF; i++) { printf $i; if(i!=NF) printf ","} print""}'
+	
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- considera l'output di "ls -l", dai una lista delle parole contenute
+	in cui ciascuna parola compare una volta sola. Una parola e' una sequenza di caratteri separata spazi.
+	awk '{for(i=1; i<=NF; i++) print $i}' fichero |sort |uniq
+	ls -l | awk '{for(i=1; i<=NF; i++) print $i}' | sort | uniq
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>	
+
+	Ejecute lo siquiente para que awk sólo muestre la línea cuya columna contenga la expresión regular Dato5:
+	awk '/Dato5/ { print }' ejemplo.txt
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Ejecute lo siguiente para que awk sólo muestre la columna 3 y la columna 1 —en ese orden:
+	awk '{ print $3, $1}' ejemplo.txt
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Ejecute lo siguiente para que awk sólo muestre las líneas con más de 35 caracteres en el archivo /etc/crontab:
+	awk 'length > 35' /etc/crontab
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Para que awk reconozca cada línea como un registro completo, en lugar de considerar cada palabra como una columna, se 	utiliza 
+	'BEGIN { FS="\n" ; RS=""}',
+	awk -F"\n" -v RS="" '{print $…}’ o  awk -v FS="\n" -v RS="" '{print $…}’
+
+ 	donde el valor de FS (Field Separator o separador de campo) se establece como un 	retorno de carro y el valor de 	RS (Record Separator o separador de registro) se 	establece como una línea vacía. Si utiliza el siguiente mandato 	donde se 		establecen 	los valores mencionados para FS y RS y se pide se impriman los 		valores 	de cada 		registro (cada línea) separados por una coma y un 	espacio: 
+	awk 'BEGIN { FS="n"; RS="" } { print $1 ", " $2 ", " $3 ", " $4 }' usuario.txt 
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	AWK puede realizar conteo de líneas, palabras y caracteres. Ejecute lo siguiente 	para establecer que el valor de w sea igual al número de campos (New Field o NF), 	c sea igual la longitud de cada campo y que se imprima el número de campos, el 		valor de w y el valor de c:
+
+
+	awk '{ w += NF; c += length } \
+    	END { print \
+    	"Campos: " NR , "\nPalabras: " w, "\nCaracteres: " c }' \
+	    usuario.txt
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Para hacer conteo de frecuencia de palabras, se establece que el valor para FS 		(Field Separator o separador de línea) sea igual a expresiones regulares que van 	desde l	a letra a hasta la letra z y desde la letra A hasta la letra Z y se 		establece que el valor de la variable i sea igual a 1 y menor al número de campos.
+
+	awk 'BEGIN { FS="[^a-zA-Z]+" } \
+    	{ for (i=1; i<=NF; i++) words[tolower($i)]++ } \
+    	END { for (i in words) print i, words[i] }' /etc/crontab
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- dai la stessa lista di prima in cui ogni parola ha a fianco il
+	numero di occorrenze
+	ls -l | awk ‘{for (i=1; i<NF; i++) print $i}’ | sort |uniq -c
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- crea un file vuoto e usa >> ed echo per aggiungere un riga in coda al file.
+	echo hola $’\n’ ciao > file ( creo que sin el dolar va bien)
+	echo hola’\n’ ciao>file
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
+	- usa tail per vedere quando un file ha qualcosa di nuovo in coda (utile per monitorare i file di log come "/var/log/messages")
+	tail -f system.log 
+	tail -f syslog  
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	- usa tail per togliere l'intestazione all'output di ps aux
+	 ps aux | tail -n +2 ///stampare tutte le righe, dopo della riga 2
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+					Grep
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	- usa grep per selezionare tutte le righe del file /etc/passwd in cui è presente "bin/sh" come sottostringa
+	grep bin/sh /etc/master.passwd
+
+
+	- usa grep per selezionare tutte le righe del file /etc/passwd contenenti la  PAROLA "lib". Verificare con l'opzione --color di grep che "lib" non sia matchato come sottostringa di una stringa delle righe selezionate.
+	grep --color '\<lib\>’ h
+	grep -w --color ‘lib’ h
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Use grep to search words only
+
+	When you search for boo, grep will match fooboo, boo123, barfoo35 and more. You 	can force the grep command to select only those lines containing matches that form 	whole words i.e. match only boo word:
+	$ grep -w "boo" file
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Use grep to search 2 different words
+	egrep -w 'word1|word2' /path/to/file
+	
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Count line when words has been matched
+
+	The grep can report the number of times that the pattern has been matched for each 	file using -c (count) option:
+	$ grep -c 'word' /path/to/file
+
+	Pass the -n option to precede each line of output with the number of the line in 	the text file from which it was obtained:
+	$ grep -n 'root' /etc/passwd
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Grep invert match
+
+	You can use -v option to print inverts the match; that is, it matches only those 	lines that do not contain the given word. For example print all line that do not 	contain the word bar:
+	$ grep -v bar /path/to/file
+
+	You can display only lines starting with the word vivek only i.e. do not display 	vivekgite, vivekg etc:
+	grep -w ^vivek /etc/passwd
+
+	Find lines ending with word foo:
+	grep 'foo$' filename
+
+	Match line only containing foo:
+	grep '^foo$' filename
+
+	You can search for blank lines with the following examples:
+	grep '^$' filename
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	Para buscar todas las líneas que comienzan por «Ahora» y terminan con «siempre» 	seguido de una cantidad arbitraria de espacio en blanco (nótese que el carácter ^ 	representa el inicio de la línea, así como $ representa el final):
+
+	$ grep '^Ahora.*siempre *$'
+	
+	grep '^.$'	{lines with exactly one character}
+
+	For example, if we want to match anything that has two characters and then the 		string "cept", we could use the following pattern:
+
+	grep "..cept" GPL-3
+	
+	This example is like the pattern ".ode", but will not match the pattern "code":
+
+	grep "[^c]ode" GPL-3
+	
+	this means that if we want to find every line that begins with a capital letter, 	we can use the following pattern:
+
+	grep "^[A-Z]" GPL-3
+	
+	If we wanted to find each line that contained an opening and closing parenthesis, 	with only letters and single spaces in between, we could use the following 		expression:
+
+	grep "([A-Za-z ]*)" GPL-3
+	
+
+	leggere http://www.cyberciti.biz/faq/grep-regular-expressions/
+	https://www.digitalocean.com/community/tutorials/using-grep-regular-expressions-	to-search-for-text-patterns-in-linux
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	- usa grep per selezionare i processi dell'utente root
+	ps aux | grep root
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- usa grep (ed eventualmente altri comandi) per contare il numero di processi dell'utente root
+	ps aux | grep -c root
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- usa grep per selezionare tutte e sole le righe che contengono la parola "/root" 	o anche la parola "/dev"
+	 less /etc/master.passwd | egrep -w --color '/root|/var'
+ 	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- usa grep per selezionare tutte le righe del file /etc/passwd in cui il quinto campo inizia per G (i campi sono separati da ":")
+	awk 'BEGIN {FS=":"} {print $8}' /etc/master.passwd | sort | grep --		color ^G 
+	>>cambiare $8 por $5
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- usa grep per selezione le righe del file /etc/passwd che contengono la sottostringa "log" nel primo campo e il cui ultimo campo è "/bin/false"
+	>>>sh-3.2# less /etc/master.passwd | grep --color '^da.*/bin/false$'
+	>>>sh-3.2# less /etc/master.passwd | grep --color ‘lo.*/bin/false$’
+
+	- usa grep per selezione le righe del file /etc/passwd che iniziano con la sottostringa "sys" e il cui ultimo campo è "/bin/sh" o "/bin/false"
+	less etc/master.passwd | grep ^[a-zA-Z0-9]*sys | egrep —color ‘(sh$|false)’
+	less /etc/master.passwd | egrep ^[^:_#]*sys | egrep —color ‘(sh$|false)’
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+					awk
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	- usa awk per contare la lista dei processi dell'utente root
+	>>>>>>>ps -u root | awk 'END { print NR}' 
+	>>>>>>> ps aux | grep -c root
+
+	- usa awk per stampare solo la terza riga del file /etc/passwd
+	>>>>>awk ‘NR == 3 ’ /etc/passwd
+	>>>>>awk ‘{if (NR==3) print $0}’ /etc/passwd
+
+	- usa awk per stampare solo il primo campo della terza riga del file /etc/passwd
+	>>>>>> awk -F : ‘{if (NR ==3 ) print $1}’ /etc/passwd
+
+	- usa awk (con e senza wc) per contare il numero di processi dell'utente root
+	>>>>sh-3.2# ps -u root | wc -l
+
+	- usa awk per fare la somma dei pid dei processi attivi
+	>>>>ps aux | awk ‘{s+=$2} END {print s}’
+
+	- usa awk per dare la lista degli utenti
+	>>>>awk -F : ‘{print $1}’ /etc/master.passwd
+	>>>>>sh-3.2# awk  'BEGIN {FS = ":"}; { print $1'} /etc/master.passwd
+
+	- usa awk per dare la lista degli utenti che usano /bin/sh
+	>>>>sh-3.2# awk -F : '{if ($10 == "/bin/sh") print $0 }' /etc/master.passwd 
+  	>>>>sh-3.2# awk -F : '{if ($NF == "/bin/sh") print $0 }' /etc/master.passwd 
+	>>>>sh-3.2# less /etc/master.passwd | grep /bin/sh | awk 'BEGIN {FS=":"}{print $0}'
+  	>>>>sh-3.2# less /etc/master.passwd | grep /bin/sh | awk -F : '{print $0}'
+  
+	- usa awk per stampare in output una tabella con due colonne (shell, numero di utenti che usano tale shell). Puoi usare anche altri comandi oltre awk.
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	- come sopra ma scambiare le colonne
+
+	- usa awk per stampare ogni campo del file /etc/passwd in <>
+	###sh-3.2# awk 'gsub(":","<>") {print $0}' /etc/master.passwd
+
+	- usa awk per sostituire tutte le "/" con un "-" 
+	###sh-3.2# awk 'gsub("/","-") {print $0}' /etc/master.passwd
+
+	- usa awk per sostituire tutte le "/" con un "-" solo nell'ultimo campo!
+	##sh-3.2# less /etc/master.passwd | awk -F :  'gsub (“/“,”-“,$NF){print $NF}'
+
+	- usa awk per estrarre dalla lista dei package debian la prima e la seconda riga
+    	##sh-3.2# less /etc/master.passwd |awk  'BEGIN {FS=":"} gsub ("/","-",$NF){print $NF}’
+
+	>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+	per avere il valore in echo:
+	>>>echo hola $’\n’ ciao > file
